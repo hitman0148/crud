@@ -1,25 +1,115 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
+// import { createRouter, createWebHistory } from 'vue-router'
+import HrisView from '../views/HrisView.vue'
+import PayslipView from '../views/PayslipView.vue'
+import LoginView from '../views/LoginView.vue'
+import MenuComponent from '../components/MenuComponent.vue'
+
+import History from '../views/HistoryView.vue'
+import Profile from '../views/ProfileView.vue'
+// import UserList from '../views/UserListView.vue'
+import PageNotFound from '../views/PageNotFound.vue'
+
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    name: 'Login',
+    component: LoginView,
+    meta: {
+      title: "Login",
+      auth: true
+    },
+    // beforeEnter: (next) => {
+    //   if(this.$q.localStorage.getItem('is_login') == true){
+    //     next()
+    //   }else{
+    //     return false
+    //   }
+    // },
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    path: '/menu',
+    name: 'menu',
+    component: MenuComponent,
+    children:[
+      {
+        path: '/hris',
+        name: 'hris',
+        component: HrisView,
+        meta: {
+          title: 'HRIS',
+          auth: true
+        }
+      },
+      {
+        path: '/payslip',
+        name: 'payslip',
+        component: PayslipView,
+        meta: {
+          title: 'Payslip',
+          auth: true
+        }
+      },
+      {
+        path:'/history',
+        name:'history',
+        component: History,
+        meta: {
+          title: 'History',
+          auth: true
+        }
+      },
+      {
+        path:'/profile',
+        name:'profile',
+        component: Profile,
+        meta: {
+          title: 'Profile',
+          auth: true
+        }
+      },
+      // {
+      //   path: '/user',
+      //   name: 'user',
+      //   component: UserList,
+      //   meta: {
+      //     title: 'User List',
+      //     auth: true
+      //   }
+      // },
+    ]
+  },
+  
+  
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: PageNotFound,
+    meta: {
+      title: 'Page Not Found',
+      auth: true
+    }
   }
+  
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(process.env.BASE_URL),
+  // history: createWebHistory(process.env.BASE_URL),
+  // history: createWebHistory(),
   routes
 })
+
+router.beforeEach((to,from,next) => {
+  document.title = to.meta.title
+  if(to.meta.auth === true){
+    next()
+  }else{
+    return false
+  }
+})
+
+
 
 export default router
