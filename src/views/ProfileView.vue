@@ -234,7 +234,6 @@ export default {
           axios.post(this.apiUrl+'user/update/profile',form,{
             headers: {
               'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
             }
           }).then((res) => {
               console.log('profile Update',res);
@@ -251,6 +250,8 @@ export default {
               }else{
                   this.msgAlert(res.data.message,'negative','error')
               }
+          }).catch((err) =>{
+              console.log('error',err);
           })
       },
 

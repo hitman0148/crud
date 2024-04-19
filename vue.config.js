@@ -6,7 +6,7 @@ module.exports = defineConfig({
   ],
 
   publicPath: process.env.NODE_ENV === 'production'
-  ? '/crud2/'
+  ? '/crud/'
   : '/',
 
   pluginOptions: {
