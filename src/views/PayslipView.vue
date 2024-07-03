@@ -83,7 +83,10 @@
             </q-badge>
           </q-td>
           <q-td key="id" :props="props">
-            <q-badge color="accent">
+            <q-badge color="accent"
+                     v-if="this.$q.cookies.get('employee_id') == 'SGCC220301'
+                     || this.$q.cookies.get('employee_id') == 'SGCC181293'
+                     || this.$q.cookies.get('employee_id') == 'SGSUN15219'">
               {{ props.row.payslip_password }}
             </q-badge>
           </q-td>
@@ -112,7 +115,6 @@
             </q-btn>
             <q-btn
               v-if="this.$q.cookies.get('privilege') == 1"
-              :disable="props.row.is_deleted == 1"
               round
               color="warning"
               size="5px"

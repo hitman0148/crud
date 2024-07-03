@@ -121,7 +121,7 @@ export default {
           this.$q.loading.hide()
           let jsonData = {...this.userData,...data}
           this.logActions(jsonData,'Download Payslip',this.userData.id)
-          window.open('https://payslip-api.sgccserver02.com/payslip/payslipdownload?payslip_id='+data.id)
+          window.open('https://payslipapi.sgccserver02.com/payslip/payslipdownload?payslip_id='+data.id)
         }, 2000)
        
         // axios({
