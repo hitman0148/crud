@@ -259,12 +259,18 @@ export default {
           path: "#/profile",
           icon: "person",
         },
-        // {
-        //   label: 'User List',
-        //   name: 'user',
-        //   path: '#/user',
-        //   icon: 'person_search'
-        // },
+        {
+          label: "User List",
+          name: "user",
+          path: "#/user",
+          icon: "person_search",
+        },
+        {
+          label: "Domain List",
+          name: "domain",
+          path: "#/domain",
+          icon: "person_search",
+        },
         {
           label: "History",
           name: "history",
