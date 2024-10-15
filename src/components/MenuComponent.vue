@@ -269,7 +269,7 @@ export default {
           label: "Domain List",
           name: "domain",
           path: "#/domain",
-          icon: "person_search",
+          icon: "dns",
         },
         {
           label: "History",

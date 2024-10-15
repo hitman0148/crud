@@ -3,12 +3,10 @@ import axios from "axios";
 export default {
   data() {
     return {
-      apiUrl: "http://localhost/project/crud-api/public/",
+      apiUrl: "http://localhost/project/crud-apiv2/api/",
       //   apiUrl: "http://172.15.17.167/crud/crud-api/public/",
       // apiUrl: "https://hitman.sgccserver02.com/crud-api/public/",
       // token: this.$q.localStorage.getItem('token'),
-      // userid: 19,
-      // userRoles : [],
       userData: {
         profile: this.$q.localStorage.getItem("profile"),
         email: this.$q.cookies.get("email"),

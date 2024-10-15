@@ -65,36 +65,24 @@
           <q-td key="id" :props="props">
             {{ props.row.id }}
           </q-td>
-          <q-td key="id" :props="props" style="text-align: center;" width="5px">
-            <q-avatar size="24px" v-if="props.row.profile != ''">
-              <q-img
-                circle
-                :src="props.row.profile != '' ? props.row.profile : ''"
-              />
-            </q-avatar>
-            <!-- <q-avatar size="24px" v-else :style="styleObject" text-color="white" class="text-weight-bold">{{props.row.fullname.split('')[0].toUpperCase()}}</q-avatar> -->
-            <q-avatar
-              size="24px"
-              v-else
-              :style="{
-                'background-color': this.randomColor(),
-                border: 'solid 1px white',
-              }"
-              text-color="white"
-              class="text-weight-bold"
-            >
-              <div class="absolute-center">
-                {{ props.row.fullname.split("")[0].toUpperCase() }}
-              </div>
-            </q-avatar>
-          </q-td>
           <q-td key="id" :props="props" style="text-align: left;">
-            {{ props.row.fullname }}
+            {{ props.row.domain }}
           </q-td>
           <q-td key="id" :props="props">
-            <q-badge color="purple">
-              {{ props.row.employee_id }}
+            <q-badge color="purple" v-if="(props.row.ipadd != '')">
+              {{ props.row.ipadd }}
             </q-badge>
+          </q-td>
+          <q-td key="id" :props="props">
+            {{ props.row.issued_on }}
+          </q-td>
+          <q-td key="id" :props="props">
+            <q-badge color="positive" v-if="(props.row.expires_on != '')">
+              {{ props.row.expires_on }}
+            </q-badge>
+          </q-td>
+          <q-td key="id" :props="props">
+            {{ props.row.remarks }}
           </q-td>
           <q-td key="id" :props="props" class="q-gutter-sm">
             <q-btn
@@ -107,19 +95,10 @@
             >
               <q-tooltip>Edit User</q-tooltip>
             </q-btn>
+
             <q-btn
               round
-              glossy
               color="negative"
-              size="5px"
-              icon="autorenew"
-              @click="resetPassword(props)"
-            >
-              <q-tooltip>Reset Password</q-tooltip>
-            </q-btn>
-            <q-btn
-              round
-              color="warning"
               size="5px"
               icon="delete"
               @click="deleteUser(props.row)"
@@ -141,7 +120,7 @@
           <q-input
             filled
             dense
-            v-model="user_data.domain"
+            v-model="data.domain"
             autofocus
             label="Domain"
             dark
@@ -153,7 +132,7 @@
           <q-input
             filled
             dense
-            v-model="user_data.ipadd"
+            v-model="data.ipadd"
             autofocus
             label="IP Add."
             dark
@@ -165,9 +144,9 @@
           <q-input
             filled
             dense
-            v-model="user_data.daterenew"
+            v-model="data.issued_on"
             autofocus
-            label="Date Renew"
+            label="Issued On"
             type="date"
             dark
             clear
@@ -178,9 +157,9 @@
           <q-input
             filled
             dense
-            v-model="user_data.dateexp"
+            v-model="data.expires_on"
             autofocus
-            label="Date Expired"
+            label="Expires On"
             type="date"
             dark
             clear
@@ -191,7 +170,7 @@
           <q-input
             filled
             dense
-            v-model="user_data.remarks"
+            v-model="data.remarks"
             autofocus
             label="Remarks"
             dark
@@ -211,10 +190,10 @@
           <q-btn
             glossy
             size="sm"
-            v-if="user_data.id == ''"
+            v-if="data.id == ''"
             rounded
             label="Submit"
-            @click="createUser"
+            @click="addDomain"
             color="positive"
           />
           <q-btn
@@ -223,7 +202,7 @@
             v-else
             rounded
             label="Update"
-            @click="updateUser"
+            @click="updateData"
             color="primary"
           />
         </q-card-actions>
@@ -234,23 +213,23 @@
 
 <script>
 import mixin from "../mixin";
-// import axios from "axios";
+import axios from "axios";
 
 const columns = [
   { name: "id", align: "center", label: "ID", field: "id" },
   { name: "domain", align: "center", label: "DOMAIN", field: "domain" },
   { name: "ipadd", align: "center", label: "IP ADD", field: "ipadd" },
   {
-    name: "date_renew",
+    name: "issued_on",
     align: "center",
-    label: "DATE RENEW",
-    field: "date_renew",
+    label: "ISSUED ON",
+    field: "issued_on",
   },
   {
-    name: "date_exp",
+    name: "expires_on",
     align: "center",
-    label: "DATE EXPIRED",
-    field: "date_exp",
+    label: "EXPIRES ON",
+    field: "expires_on",
   },
   { name: "remarks", label: "REMARKS", field: "remarks", align: "center" },
   { name: "action", label: "ACTION", field: "action", align: "center" },
@@ -274,17 +253,186 @@ export default {
         rowsNumber: 10,
       },
       prompt: false,
-      user_data: {
+      data: {
         id: "",
         domain: "",
         ipadd: "",
-        daterenew: "",
-        dateexp: "",
+        issued_on: "",
+        expires_on: "",
         remarks: "",
       },
     };
   },
-  methods: {},
+  methods: {
+    addDomain() {
+      var formData = new FormData();
+      formData.append("domain", this.data.domain);
+      formData.append("ipadd", this.data.ipadd);
+      formData.append("issued_on", this.data.issued_on);
+      formData.append("expires_on", this.data.expires_on);
+      formData.append("remarks", this.data.remarks);
+      formData.append("status", "active");
+      formData.append("created_by", this.userData.fullname);
+
+      axios
+        .post(this.apiUrl + "domain", formData, {
+          headers: { "Content-Type": "application/json" },
+        })
+        .then((res) => {
+          console.log(res);
+          this.clearData();
+          this.onRequest({
+            pagination: this.pagination,
+            filter: this.filter,
+          });
+          this.msgAlert(res.data.msg, "positive", "task_alt");
+        });
+    },
+    editDialog(data) {
+      console.log(data);
+      this.prompt = true;
+      this.data.id = data.id;
+      this.data.domain = data.domain;
+      this.data.ipadd = data.ipadd;
+      this.data.issued_on = data.issued_on;
+      this.data.expires_on = data.expires_on;
+      this.data.remarks = data.remarks;
+    },
+
+    updateData() {
+      var formData = new FormData();
+      formData.append("id", this.data.id);
+      formData.append("domain", this.data.domain);
+      formData.append("ipadd", this.data.ipadd);
+      formData.append("issued_on", this.data.issued_on);
+      formData.append("expires_on", this.data.expires_on);
+      formData.append("remarks", this.data.remarks);
+      formData.append("status", "active");
+
+      axios
+        .post(this.apiUrl + "domain/mod", formData, {
+          headers: { "Content-Type": "application/json" },
+        })
+        .then((res) => {
+          console.log(res);
+          this.clearData();
+          this.onRequest({
+            pagination: this.pagination,
+            filter: this.filter,
+          });
+          this.msgAlert(res.data.msg, "positive", "task_alt");
+        });
+    },
+
+    deleteUser(data) {
+      this.$q
+        .dialog({
+          dark: true,
+          title: "Delete User",
+          message: "Are you sure?",
+          cancel: true,
+          persistent: true,
+        })
+        .onOk(() => {
+          axios
+            .post(
+              this.apiUrl + "domain/rem",
+              { id: data.id },
+              {
+                headers: { "Content-Type": "application/json" },
+              }
+            )
+            .then((res) => {
+              this.onRequest({
+                pagination: this.pagination,
+                filter: this.filter,
+              });
+              this.msgAlert(res.data.msg, "positive", "task_alt");
+            });
+        });
+    },
+    clearData() {
+      this.prompt = false;
+      this.data.id = "";
+      this.data.domain = "";
+      this.data.ipadd = "";
+      this.data.issued_on = "";
+      this.data.expires_on = "";
+      this.data.remarks = "";
+    },
+    // ============================SERVERSIDE==============================================
+
+    onRequest(props) {
+      const { page, rowsPerPage, sortBy, descending } = props.pagination;
+      this.loading = true;
+      var cleanText = props.filter == undefined ? "" : props.filter.trim();
+
+      setTimeout(() => {
+        // update rowsCount with appropriate value
+        this.getRowsNumberCount(cleanText);
+        const fetchCount =
+          rowsPerPage === 0 ? this.pagination.rowsNumber : rowsPerPage;
+        const startRow = (page - 1) * rowsPerPage;
+        this.fetchFromServer(startRow, fetchCount, cleanText);
+
+        // don't forget to update local pagination object
+        this.pagination.page = page;
+        this.pagination.rowsPerPage = rowsPerPage;
+        this.pagination.sortBy = sortBy;
+        this.pagination.descending = descending;
+
+        // ...and turn of loading indicator
+        this.loading = false;
+      }, 1000);
+    },
+
+    fetchFromServer(offset, limit, filter) {
+      axios
+        .post(
+          this.apiUrl + "domain/fetchall",
+          {
+            start: offset,
+            countPerPage: limit,
+            filter: filter,
+          },
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+        .then((res) => {
+          this.rows = res.data;
+        });
+    },
+    getRowsNumberCount(filter) {
+      axios
+        .post(
+          this.apiUrl + "domain/count",
+          { filter: filter },
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+        .then((res) => {
+          this.pagination.rowsNumber = res.data;
+        });
+    },
+    // =============================END SERVERSIDE===========================================
+  },
+  mounted() {
+    this.onRequest({
+      pagination: this.pagination,
+      filter: undefined,
+    });
+
+    if (this.$q.cookies.get("is_auth") != "true") {
+      window.location = "#/";
+      this.logoutData();
+    }
+  },
 };
 </script>
 
