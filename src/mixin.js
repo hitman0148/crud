@@ -3,17 +3,10 @@ import axios from 'axios'
 export default {
 	data (){
 		return {
-			// apiUrl : 'http://localhost/project/crud-api/public/',
+			apiUrl : 'http://localhost/crud/crud-api/api/',
 			// apiUrl : 'http://115.84.243.173/crud/crud-api/public/',
-			apiUrl : 'https://hitman.sgccserver02.com/crud-api/public/',
-			// token: this.$q.localStorage.getItem('token'),
-			// userid: 19,
-			// userRoles : [],
+			// apiUrl : 'https://hitman.sgccserver02.com/crud-api/public/',
 			userData : {
-				// id: this.$q.localStorage.getItem('id'),
-				// fullname: this.$q.localStorage.getItem('fullname'),
-				// employee_id: this.$q.localStorage.getItem('employee_id'),
-				// privilege: this.$q.localStorage.getItem('privilege'),
 				profile: this.$q.localStorage.getItem('profile'),
 				email: this.$q.cookies.get('email'),
 				id: this.$q.cookies.get('id'),
@@ -77,21 +70,6 @@ export default {
 			this.$q.cookies.set('email',row.email,this.options)
 			this.$q.cookies.set('join_date',row.date_created,this.options)
 		}
-
-		// isLogin(){
-		// 	if(!this.$q.cookies.has('is_login')){
-		// 		window.location = '#/'
-		// 	}
-		// }
 	},
-	// mounted () {
-	//
-	// 	// this.getCategoryList()
-	// }
-	// watch:{
-	// 	'userData.fullname'(newVal){
-	// 		console.log('watcher',newVal);
-	// 	}
-	// }
 
 };
