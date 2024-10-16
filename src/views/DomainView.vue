@@ -9,6 +9,20 @@
       rounded
       @click="prompt = !prompt"
     />
+
+    <q-btn
+      size="sm"
+      label="Domain Checker"
+      right-icon="person_add"
+      color="info"
+      rounded
+      @click="chekDomain"
+    />
+
+    <div class="text-subtitle q-ma-sm text-white">
+      Note: Domain checker is only show 1week before expired the renewed ssl
+    </div>
+
     <q-table
       dense
       dark
@@ -61,7 +75,10 @@
       </template>
 
       <template v-slot:body="props">
-        <q-tr :props="props">
+        <q-tr
+          :props="props"
+          v-bind:class="[props.row.dt < 5 ? 'bg-white text-red' : '']"
+        >
           <q-td key="id" :props="props">
             {{ props.row.id }}
           </q-td>
@@ -77,7 +94,10 @@
             {{ props.row.issued_on }}
           </q-td>
           <q-td key="id" :props="props">
-            <q-badge color="positive" v-if="(props.row.expires_on != '')">
+            <q-badge v-if="props.row.dt >= 5" color="positive">
+              {{ props.row.expires_on }}
+            </q-badge>
+            <q-badge v-else color="negative">
               {{ props.row.expires_on }}
             </q-badge>
           </q-td>
@@ -86,6 +106,7 @@
           </q-td>
           <q-td key="id" :props="props" class="q-gutter-sm">
             <q-btn
+              v-if="this.userData.privilege == 1"
               round
               glossy
               color="primary"
@@ -97,6 +118,7 @@
             </q-btn>
 
             <q-btn
+              v-if="this.userData.privilege == 1"
               round
               color="negative"
               size="5px"
@@ -208,6 +230,28 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="prompt2" persistent>
+      <q-card style="min-width: 350px;" dark>
+        <q-card-section class="bg-blue-grey-8 q-mb-sm">
+          <div class="text-h6">Domain List</div>
+          <div class="text-subtitle">List of domain need to renew</div>
+        </q-card-section>
+
+        <q-table dark :rows="rows2" :columns="columns2" row-key="name" />
+
+        <q-card-actions align="right" class="bg-blue-grey-8">
+          <q-btn
+            glossy
+            size="sm"
+            rounded
+            label="Close"
+            v-close-popup
+            color="negative"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -234,14 +278,33 @@ const columns = [
   { name: "remarks", label: "REMARKS", field: "remarks", align: "center" },
   { name: "action", label: "ACTION", field: "action", align: "center" },
 ];
+const columns2 = [
+  { name: "id", align: "center", label: "ID", field: "id" },
+  { name: "domain", align: "center", label: "DOMAIN", field: "domain" },
+  { name: "ipadd", align: "center", label: "IP ADD", field: "ipadd" },
+  {
+    name: "issued_on",
+    align: "center",
+    label: "ISSUED ON",
+    field: "issued_on",
+  },
+  {
+    name: "expires_on",
+    align: "center",
+    label: "EXPIRES ON",
+    field: "expires_on",
+  },
+];
 export default {
   mixins: [mixin],
   data() {
     return {
       columns,
+      columns2,
       loading: false,
       filter: "",
       rows: [],
+      rows2: [],
       offset: 0,
       limit: 15,
       selected: [],
@@ -253,6 +316,7 @@ export default {
         rowsNumber: 10,
       },
       prompt: false,
+      prompt2: false,
       data: {
         id: "",
         domain: "",
@@ -421,6 +485,21 @@ export default {
         });
     },
     // =============================END SERVERSIDE===========================================
+    chekDomain() {
+      axios
+        .get(this.apiUrl + "dom-check", {
+          headers: { "Content-Type": "application/json" },
+        })
+        .then((res) => {
+          console.log("check domain", res.data.length);
+          if (res.data.length <= 0) {
+            this.msgAlert("No found domain to renew", "positive", "task_alt");
+          } else {
+            this.prompt2 = !this.prompt2;
+            this.rows2 = res.data;
+          }
+        });
+    },
   },
   mounted() {
     this.onRequest({

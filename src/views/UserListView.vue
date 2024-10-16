@@ -96,6 +96,9 @@
               {{ props.row.employee_id }}
             </q-badge>
           </q-td>
+          <q-td key="id" :props="props">
+            {{ props.row.email }}
+          </q-td>
           <q-td key="id" :props="props" class="q-gutter-sm">
             <q-btn
               round
@@ -181,6 +184,19 @@
             </template>
           </q-input>
         </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input
+            filled
+            dense
+            v-model="user_data.email"
+            autofocus
+            label="Email Address"
+            dark
+            clear
+          />
+        </q-card-section>
+
         <q-card-section class="q-pt-none">
           <q-file
             filled
@@ -248,6 +264,12 @@ const columns = [
     field: "employee_id",
     align: "center",
   },
+  {
+    name: "email",
+    label: "EM@IL ADD",
+    field: "email",
+    align: "center",
+  },
   { name: "action", label: "ACTION", field: "action", align: "center" },
 ];
 export default {
@@ -270,13 +292,13 @@ export default {
         page: 1,
         rowsNumber: 10,
       },
-
       prompt: false,
       user_data: {
         id: "",
         fullname: "",
         employee_id: "",
         password: "",
+        email: "",
         profile: "",
       },
       isPwd: true,
@@ -335,6 +357,7 @@ export default {
       this.user_data.id = data.id;
       this.user_data.fullname = data.fullname;
       this.user_data.employee_id = data.employee_id;
+      this.user_data.email = data.email;
       this.base64 = data.profile;
     },
 
@@ -343,10 +366,11 @@ export default {
       formData.append("id", this.user_data.id);
       formData.append("fullname", this.user_data.fullname.toUpperCase());
       formData.append("employee_id", this.user_data.employee_id.toUpperCase());
+      formData.append("email", this.user_data.email.toUpperCase());
       formData.append("profile", this.base64);
 
       axios
-        .put(this.apiUrl + "user/update", formData, {
+        .post(this.apiUrl + "user/update", formData, {
           headers: { "Content-Type": "application/json" },
         })
         .then((res) => {
@@ -360,6 +384,7 @@ export default {
           this.user_data.employee_id = "";
           this.user_data.fullname = "";
           this.user_data.password = "";
+          this.user_data.email = "";
           this.user_data.profile = "";
           this.base64 = "";
         });
@@ -375,7 +400,7 @@ export default {
           persistent: true,
         })
         .onOk(() => {
-          axios.delete(this.apiUrl + "user/delete/" + data.id).then((res) => {
+          axios.post(this.apiUrl + "user/delete/" + data.id).then((res) => {
             if (res.data.status == 200) {
               this.onRequest({
                 pagination: this.pagination,
@@ -408,6 +433,7 @@ export default {
       formData.append("fullname", this.user_data.fullname.toUpperCase());
       formData.append("employee_id", this.user_data.employee_id.toUpperCase());
       formData.append("password", this.user_data.password);
+      formData.append("email", this.user_data.email);
       formData.append("profile", this.base64);
 
       axios
@@ -427,6 +453,7 @@ export default {
             this.user_data.fullname = "";
             this.user_data.password = "";
             this.user_data.profile = "";
+            this.user_data.email = "";
             this.base64 = "";
           } else {
             if (Object.values(myRes.data).length > 0) {
@@ -487,7 +514,7 @@ export default {
     getRowsNumberCount(filter) {
       axios
         .post(
-          this.apiUrl + "users/count",
+          this.apiUrl + "user/count",
           { filter: filter },
           {
             headers: {
